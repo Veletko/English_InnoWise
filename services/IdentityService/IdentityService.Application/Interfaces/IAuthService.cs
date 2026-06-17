@@ -4,9 +4,9 @@ namespace IdentityService.Application.Interfaces
 {
     public interface IAuthService
     {
-        Task<AuthResponseDto> LoginAsync(LoginRequestDto request);
-        Task<AuthResponseDto> RegisterAsync(RegisterRequestDto request);
-        Task<AuthResponseDto> RefreshTokenAsync(string refreshToken);
-        Task RevokeRefreshTokenAsync(string refreshToken);
+        Task<AuthResponseDto> LoginAsync(LoginRequestDto request, CancellationToken cancellationToken);
+        Task<AuthResponseDto> RegisterAsync(RegisterRequestDto requestm, CancellationToken cancellationToken);
+        Task<AuthResponseDto> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
+        Task RevokeRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
     }
 }

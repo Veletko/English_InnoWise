@@ -2,10 +2,12 @@
 
 namespace IdentityService.Application.DTOs;
 
-public record RegisterRequestDto(
+public record RegisterRequestDto
+(
     string Email,
     string Password,
     string FirstName,
     string LastName,
-    UserRole Role 
+    UserRole Role
 );
+

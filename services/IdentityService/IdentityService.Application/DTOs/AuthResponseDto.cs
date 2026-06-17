@@ -1,9 +1,8 @@
 ﻿
-namespace IdentityService.Application.DTOs
-{
-    public record AuthResponseDto
-    (
-        string AccessToken,
-        string RefreshToken
-    );
-}
+namespace IdentityService.Application.DTOs;
+
+public record AuthResponseDto
+(
+    string AccessToken,
+    string RefreshToken
+);

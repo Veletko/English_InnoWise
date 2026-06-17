@@ -1,10 +1,9 @@
 ﻿using IdentityService.Domain.Entities;
 
-namespace IdentityService.Application.Interfaces
+namespace IdentityService.Application.Interfaces;
+
+public interface IJwtTokenGenerator
 {
-    public interface IJwtTokenGenerator
-    {
-        string GenerateAccessToken(User user, IEnumerable<string> roles);
-        string GenerateRefreshToken( );
-    }
+    string GenerateAccessToken(User user, IEnumerable<string> roles);
+    string GenerateRefreshToken( );
 }

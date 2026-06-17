@@ -6,5 +6,5 @@ public class User : IdentityUser<Guid>
 {
     public required string FirstName { get; set; }
     public required string LastName { get; set; }
-    public DateTime CreatedAtUtc { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
 }

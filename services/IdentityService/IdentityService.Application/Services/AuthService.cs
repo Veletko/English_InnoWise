@@ -64,12 +64,12 @@ public class AuthService(UserManager<Domain.Entities.User> userManager,
             throw new Exception("User creation failed: " + string.Join(", ", result.Errors.Select(e => e.Description)));
         }
 
-        string roleName = request.Role.ToString();
+        var roleName = request.Role.ToString();
         await _userManager.AddToRoleAsync(newUser, roleName);
 
         var roles = new List<string> { roleName };
-        string accessToken = _jwtTokenGenerator.GenerateAccessToken(newUser, roles);
-        string refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
+        var accessToken = _jwtTokenGenerator.GenerateAccessToken(newUser, roles);
+        var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
 
         var refreshTokenEntity = new Domain.Entities.RefreshToken
         {

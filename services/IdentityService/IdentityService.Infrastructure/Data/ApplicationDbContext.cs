@@ -5,9 +5,8 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace IdentityService.Infrastructure.Data;
 
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<User, IdentityRole<Guid>, Guid>
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<User, IdentityRole<Guid>, Guid>(options)
 {
-    
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -42,3 +41,4 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         return new Guid(hash).ToString();
     }
 }
+

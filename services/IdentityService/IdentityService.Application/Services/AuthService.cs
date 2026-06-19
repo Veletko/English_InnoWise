@@ -1,17 +1,19 @@
 ﻿using IdentityService.Application.DTOs;
 using IdentityService.Application.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using IdentityService.Domain.Entities;
 
 namespace IdentityService.Application.Services;
 
 public class AuthService(UserManager<Domain.Entities.User> userManager,
         IRefreshTokenRepository refreshTokenRepository,
-        IJwtTokenGenerator jwtTokenGenerator) : IAuthService
+        IJwtTokenGenerator jwtTokenGenerator,
+        TimeProvider timeProvider) : IAuthService
 {
     private readonly UserManager<Domain.Entities.User> _userManager = userManager;
     private readonly IRefreshTokenRepository _refreshTokenRepository = refreshTokenRepository;
     private readonly IJwtTokenGenerator _jwtTokenGenerator = jwtTokenGenerator;
-
+    private readonly TimeProvider _timeProvider = timeProvider;
     public async Task<AuthResponseDto> LoginAsync(LoginRequestDto request, CancellationToken cancellationToken)
     {
         var user = await _userManager.FindByEmailAsync(request.Email)
@@ -26,14 +28,15 @@ public class AuthService(UserManager<Domain.Entities.User> userManager,
         var roles = await _userManager.GetRolesAsync(user);
         var accessToken = _jwtTokenGenerator.GenerateAccessToken(user, roles);
         var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
-
-        var refreshTokenEntity = new Domain.Entities.RefreshToken
+        
+        var now = _timeProvider.GetUtcNow();
+        
+        var refreshTokenEntity = new RefreshToken
         {
-            Id = Guid.NewGuid(),
             UserId = user.Id,
             Token = refreshToken,
-            CreatedAtUtc = DateTimeOffset.UtcNow,
-            ExpiresAtUtc = DateTimeOffset.UtcNow.AddDays(7),
+            CreatedAtUtc = now,
+            ExpiresAtUtc = now.AddDays(7),
             IsRevoked = false
         };
         await _refreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
@@ -47,15 +50,15 @@ public class AuthService(UserManager<Domain.Entities.User> userManager,
         {
             throw new Exception("User with this email already exists");
         }
-
-        var newUser = new Domain.Entities.User
+        
+        var now = _timeProvider.GetUtcNow();
+        
+        var newUser = new User
         {
-            Id = Guid.NewGuid(),
-            UserName = request.Email,
             Email = request.Email,
             FirstName = request.FirstName,
             LastName = request.LastName,
-            CreatedAtUtc = DateTimeOffset.UtcNow
+            CreatedAtUtc = now
         };
 
         var result = await _userManager.CreateAsync(newUser, request.Password);
@@ -70,14 +73,13 @@ public class AuthService(UserManager<Domain.Entities.User> userManager,
         var roles = new List<string> { roleName };
         var accessToken = _jwtTokenGenerator.GenerateAccessToken(newUser, roles);
         var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
-
-        var refreshTokenEntity = new Domain.Entities.RefreshToken
+        
+        var refreshTokenEntity = new RefreshToken
         {
-            Id = Guid.NewGuid(),
             UserId = newUser.Id,
             Token = refreshToken,
-            CreatedAtUtc = DateTimeOffset.UtcNow,
-            ExpiresAtUtc = DateTimeOffset.UtcNow.AddDays(7),
+            CreatedAtUtc = now,
+            ExpiresAtUtc = now.AddDays(7),
             IsRevoked = false
         };
 
@@ -86,17 +88,19 @@ public class AuthService(UserManager<Domain.Entities.User> userManager,
         return new AuthResponseDto(accessToken, refreshToken);
 
     }
-    public async Task<AuthResponseDto> GenerateRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
+    public async Task<AuthResponseDto> UpdateRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
     {
-        var existingToken = await _refreshTokenRepository.GetByTokenAsync(refreshToken, cancellationToken)
+        var existingToken = await _refreshTokenRepository.GetByTokenAsync(refreshToken, cancellationToken, true)
             ?? throw new Exception("Refresh token not found");
 
         if (existingToken.IsRevoked)
         {
             throw new Exception("Refresh token is revoked");
         }
-
-        if (existingToken.ExpiresAtUtc < DateTimeOffset.UtcNow)
+        
+        var now = _timeProvider.GetUtcNow();
+        
+        if (existingToken.ExpiresAtUtc < now)
         {
             throw new Exception("Refresh token has expired");
         }
@@ -105,27 +109,27 @@ public class AuthService(UserManager<Domain.Entities.User> userManager,
             ?? throw new Exception("User not found");
         
         existingToken.IsRevoked = true;
+        await  _refreshTokenRepository.UpdateAsync(existingToken, cancellationToken);
         
         var roles = await _userManager.GetRolesAsync(user);
         var accessToken = _jwtTokenGenerator.GenerateAccessToken(user, roles);
         var newRefreshToken = _jwtTokenGenerator.GenerateRefreshToken();
         
-        var refreshTokenEntity = new Domain.Entities.RefreshToken
+        var refreshTokenEntity = new RefreshToken
         {
-            Id = Guid.NewGuid(),
             UserId = user.Id,
             Token = newRefreshToken,
-            CreatedAtUtc = DateTimeOffset.UtcNow,
-            ExpiresAtUtc = DateTimeOffset.UtcNow.AddDays(7),
+            CreatedAtUtc = now,
+            ExpiresAtUtc = now.AddDays(7),
             IsRevoked = false
         };
         await _refreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
         
-        return new AuthResponseDto(accessToken, refreshToken);
+        return new AuthResponseDto(accessToken, newRefreshToken);
     }
     public async Task RevokeRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
     {
-        var existingToken = await _refreshTokenRepository.GetByTokenAsync(refreshToken, cancellationToken);
+        var existingToken = await _refreshTokenRepository.GetByTokenAsync(refreshToken, cancellationToken, true);
         if (existingToken is null)
         {
             return;

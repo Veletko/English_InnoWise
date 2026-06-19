@@ -36,8 +36,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     }
     private static string CreateGuidFromString(string input)
     {
-        using var md5 = System.Security.Cryptography.MD5.Create();
-        byte[] hash = md5.ComputeHash(System.Text.Encoding.UTF8.GetBytes(input));
+        using var sha256 = System.Security.Cryptography.SHA256.Create();
+        byte[] hash = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(input));
         return new Guid(hash).ToString();
     }
 }

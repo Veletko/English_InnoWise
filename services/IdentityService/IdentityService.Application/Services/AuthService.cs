@@ -5,15 +5,28 @@ using IdentityService.Domain.Entities;
 
 namespace IdentityService.Application.Services;
 
-public class AuthService(UserManager<Domain.Entities.User> userManager,
+public class AuthService(UserManager<User> userManager,
         IRefreshTokenRepository refreshTokenRepository,
         IJwtTokenGenerator jwtTokenGenerator,
         TimeProvider timeProvider) : IAuthService
 {
-    private readonly UserManager<Domain.Entities.User> _userManager = userManager;
+    private static readonly TimeSpan RefreshTokenLifetime = TimeSpan.FromDays(7);
+    private readonly UserManager<User> _userManager = userManager;
     private readonly IRefreshTokenRepository _refreshTokenRepository = refreshTokenRepository;
     private readonly IJwtTokenGenerator _jwtTokenGenerator = jwtTokenGenerator;
     private readonly TimeProvider _timeProvider = timeProvider;
+
+    private static RefreshToken GenerateRefreshToken(User user, DateTimeOffset now, string refreshToken)
+    { 
+        return new RefreshToken
+        {
+            UserId = user.Id,
+            Token = refreshToken,
+            CreatedAtUtc = now,
+            ExpiresAtUtc = now.Add(RefreshTokenLifetime),
+            IsRevoked = false
+        };
+    }
     public async Task<AuthResponseDto> LoginAsync(LoginRequestDto request, CancellationToken cancellationToken)
     {
         var user = await _userManager.FindByEmailAsync(request.Email)
@@ -31,14 +44,8 @@ public class AuthService(UserManager<Domain.Entities.User> userManager,
         
         var now = _timeProvider.GetUtcNow();
         
-        var refreshTokenEntity = new RefreshToken
-        {
-            UserId = user.Id,
-            Token = refreshToken,
-            CreatedAtUtc = now,
-            ExpiresAtUtc = now.AddDays(7),
-            IsRevoked = false
-        };
+        var refreshTokenEntity = GenerateRefreshToken(user, now, refreshToken);
+        
         await _refreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
 
         return new AuthResponseDto(accessToken, refreshToken);
@@ -74,14 +81,7 @@ public class AuthService(UserManager<Domain.Entities.User> userManager,
         var accessToken = _jwtTokenGenerator.GenerateAccessToken(newUser, roles);
         var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
         
-        var refreshTokenEntity = new RefreshToken
-        {
-            UserId = newUser.Id,
-            Token = refreshToken,
-            CreatedAtUtc = now,
-            ExpiresAtUtc = now.AddDays(7),
-            IsRevoked = false
-        };
+        var refreshTokenEntity = GenerateRefreshToken(newUser, now, refreshToken);
 
         await _refreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
 
@@ -115,14 +115,8 @@ public class AuthService(UserManager<Domain.Entities.User> userManager,
         var accessToken = _jwtTokenGenerator.GenerateAccessToken(user, roles);
         var newRefreshToken = _jwtTokenGenerator.GenerateRefreshToken();
         
-        var refreshTokenEntity = new RefreshToken
-        {
-            UserId = user.Id,
-            Token = newRefreshToken,
-            CreatedAtUtc = now,
-            ExpiresAtUtc = now.AddDays(7),
-            IsRevoked = false
-        };
+        var refreshTokenEntity = GenerateRefreshToken(user, now, newRefreshToken);
+        
         await _refreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
         
         return new AuthResponseDto(accessToken, newRefreshToken);

@@ -5,7 +5,8 @@ using IdentityService.Domain.Entities;
 
 namespace IdentityService.Application.Services;
 
-public class AuthService(UserManager<User> userManager,
+public class AuthService(
+        UserManager<User> userManager,
         IRefreshTokenRepository refreshTokenRepository,
         IJwtTokenGenerator jwtTokenGenerator,
         TimeProvider timeProvider) : IAuthService
@@ -15,15 +16,15 @@ public class AuthService(UserManager<User> userManager,
     private readonly IRefreshTokenRepository _refreshTokenRepository = refreshTokenRepository;
     private readonly IJwtTokenGenerator _jwtTokenGenerator = jwtTokenGenerator;
     private readonly TimeProvider _timeProvider = timeProvider;
-
-    private static RefreshToken GenerateRefreshToken(User user, DateTimeOffset now, string refreshToken)
+    
+    private static RefreshToken GenerateRefreshToken(User user, DateTimeOffset currentTime, string refreshToken)
     { 
         return new RefreshToken
         {
             UserId = user.Id,
             Token = refreshToken,
-            CreatedAtUtc = now,
-            ExpiresAtUtc = now.Add(RefreshTokenLifetime),
+            CreatedAtUtc = currentTime,
+            ExpiresAtUtc = currentTime.Add(RefreshTokenLifetime),
             IsRevoked = false
         };
     }
@@ -42,9 +43,9 @@ public class AuthService(UserManager<User> userManager,
         var accessToken = _jwtTokenGenerator.GenerateAccessToken(user, roles);
         var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
         
-        var now = _timeProvider.GetUtcNow();
+        var currentTime = _timeProvider.GetUtcNow();
         
-        var refreshTokenEntity = GenerateRefreshToken(user, now, refreshToken);
+        var refreshTokenEntity = GenerateRefreshToken(user, currentTime, refreshToken);
         
         await _refreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
 
@@ -58,14 +59,14 @@ public class AuthService(UserManager<User> userManager,
             throw new Exception("User with this email already exists");
         }
         
-        var now = _timeProvider.GetUtcNow();
+        var currentTime = _timeProvider.GetUtcNow();
         
         var newUser = new User
         {
             Email = request.Email,
             FirstName = request.FirstName,
             LastName = request.LastName,
-            CreatedAtUtc = now
+            CreatedAtUtc = currentTime
         };
 
         var result = await _userManager.CreateAsync(newUser, request.Password);
@@ -77,20 +78,18 @@ public class AuthService(UserManager<User> userManager,
         var roleName = request.Role.ToString();
         await _userManager.AddToRoleAsync(newUser, roleName);
 
-        var roles = new List<string> { roleName };
+        IEnumerable<string> roles = [roleName];
         var accessToken = _jwtTokenGenerator.GenerateAccessToken(newUser, roles);
         var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
         
-        var refreshTokenEntity = GenerateRefreshToken(newUser, now, refreshToken);
-
+        var refreshTokenEntity = GenerateRefreshToken(newUser, currentTime, refreshToken);
         await _refreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
 
         return new AuthResponseDto(accessToken, refreshToken);
-
     }
     public async Task<AuthResponseDto> UpdateRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
     {
-        var existingToken = await _refreshTokenRepository.GetByTokenAsync(refreshToken, cancellationToken, true)
+        var existingToken = await _refreshTokenRepository.GetByTokenAsync(refreshToken, cancellationToken, trackChanges:true)
             ?? throw new Exception("Refresh token not found");
 
         if (existingToken.IsRevoked)
@@ -98,9 +97,9 @@ public class AuthService(UserManager<User> userManager,
             throw new Exception("Refresh token is revoked");
         }
         
-        var now = _timeProvider.GetUtcNow();
+        var currentTime = _timeProvider.GetUtcNow();
         
-        if (existingToken.ExpiresAtUtc < now)
+        if (existingToken.ExpiresAtUtc < currentTime)
         {
             throw new Exception("Refresh token has expired");
         }
@@ -109,13 +108,13 @@ public class AuthService(UserManager<User> userManager,
             ?? throw new Exception("User not found");
         
         existingToken.IsRevoked = true;
-        await  _refreshTokenRepository.UpdateAsync(existingToken, cancellationToken);
+        await  _refreshTokenRepository.UpdateAsync(cancellationToken);
         
         var roles = await _userManager.GetRolesAsync(user);
         var accessToken = _jwtTokenGenerator.GenerateAccessToken(user, roles);
         var newRefreshToken = _jwtTokenGenerator.GenerateRefreshToken();
         
-        var refreshTokenEntity = GenerateRefreshToken(user, now, newRefreshToken);
+        var refreshTokenEntity = GenerateRefreshToken(user, currentTime, newRefreshToken);
         
         await _refreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
         
@@ -131,6 +130,6 @@ public class AuthService(UserManager<User> userManager,
         
         existingToken.IsRevoked = true;
         
-        await _refreshTokenRepository.UpdateAsync(existingToken, cancellationToken);
+        await _refreshTokenRepository.UpdateAsync(cancellationToken);
     }
 }

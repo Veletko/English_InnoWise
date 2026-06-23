@@ -16,7 +16,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         {
             entity.ToTable("RefreshToken");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Token).IsRequired().HasMaxLength(256);
+            entity.Property(x => x.Token).HasMaxLength(256);
             entity.HasOne<User>()
                 .WithMany()
                 .HasForeignKey(x => x.UserId)

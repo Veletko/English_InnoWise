@@ -25,4 +25,12 @@ public class RefreshTokenRepository(ApplicationDbContext context) : IRefreshToke
     {
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task DeleteExpiredRefreshTokensAsync(CancellationToken cancellationToken)
+    {
+        var expiredTokens = _context.RefreshTokens.Where(x => x.ExpiresAtUtc <= DateTimeOffset.UtcNow);
+        
+        _context.RefreshTokens.RemoveRange(expiredTokens);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
 }

@@ -1,5 +1,8 @@
 ﻿using IdentityService.Application.DTOs;
 using IdentityService.Application.Interfaces;
+using IdentityService.Application.Exceptions; 
+using IdentityService.Domain.Shared; 
+using IdentityService.Domain.Errors; 
 using Microsoft.AspNetCore.Identity;
 using IdentityService.Domain.Entities;
 
@@ -28,15 +31,20 @@ public class AuthService(
             IsRevoked = false
         };
     }
-    public async Task<AuthResponseDto> LoginAsync(LoginRequestDto request, CancellationToken cancellationToken)
+    
+    public async Task<Result<AuthResponseDto>> LoginAsync(LoginRequestDto request, CancellationToken cancellationToken)
     {
-        var user = await _userManager.FindByEmailAsync(request.Email)
-            ?? throw new Exception("Wrong password or Email");
+        var user = await _userManager.FindByEmailAsync(request.Email);
         
+        if (user is null)
+        {
+            return ApplicationErrors.UserErrors.InvalidCredentials;
+        }
         
         var isPasswordValid = await _userManager.CheckPasswordAsync(user, request.Password);
-        if (!isPasswordValid) {
-            throw new Exception("Wrong password");
+        if (!isPasswordValid) 
+        {
+            return ApplicationErrors.UserErrors.InvalidCredentials;
         }
 
         var roles = await _userManager.GetRolesAsync(user);
@@ -44,19 +52,18 @@ public class AuthService(
         var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
         
         var currentTime = _timeProvider.GetUtcNow();
-        
         var refreshTokenEntity = GenerateRefreshToken(user, currentTime, refreshToken);
         
         await _refreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
-
+        
         return new AuthResponseDto(accessToken, refreshToken);
     }
-    public async Task<AuthResponseDto> RegisterAsync(RegisterRequestDto request, CancellationToken cancellationToken)
+    public async Task<Result<AuthResponseDto>> RegisterAsync(RegisterRequestDto request, CancellationToken cancellationToken)
     {
         var existingUser = await _userManager.FindByEmailAsync(request.Email);
         if (existingUser is not null)
         {
-            throw new Exception("User with this email already exists");
+            return ApplicationErrors.UserErrors.EmailInUse;
         }
         
         var currentTime = _timeProvider.GetUtcNow();
@@ -72,7 +79,8 @@ public class AuthService(
         var result = await _userManager.CreateAsync(newUser, request.Password);
         if (!result.Succeeded)
         {
-            throw new Exception("User creation failed: " + string.Join(", ", result.Errors.Select(e => e.Description)));
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            return new Error("UserErrors.CreationFailed", $"User creation failed: {errors}");
         }
 
         var roleName = request.Role.ToString();
@@ -87,28 +95,35 @@ public class AuthService(
 
         return new AuthResponseDto(accessToken, refreshToken);
     }
-    public async Task<AuthResponseDto> UpdateRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
+    
+    public async Task<Result<AuthResponseDto>> UpdateRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
     {
-        var existingToken = await _refreshTokenRepository.GetByTokenAsync(refreshToken, cancellationToken, trackChanges:true)
-            ?? throw new Exception("Refresh token not found");
+        var existingToken = await _refreshTokenRepository.GetByTokenAsync(refreshToken, cancellationToken, trackChanges:true);
+        if (existingToken is null)
+        {
+            return ApplicationErrors.TokenErrors.NotFound;
+        }
 
         if (existingToken.IsRevoked)
         {
-            throw new Exception("Refresh token is revoked");
+            return ApplicationErrors.TokenErrors.Revoked;
         }
         
         var currentTime = _timeProvider.GetUtcNow();
         
         if (existingToken.ExpiresAtUtc < currentTime)
         {
-            throw new Exception("Refresh token has expired");
+            return ApplicationErrors.TokenErrors.Expired;
         }
 
-        var user = await _userManager.FindByIdAsync(existingToken.UserId.ToString())
-            ?? throw new Exception("User not found");
+        var user = await _userManager.FindByIdAsync(existingToken.UserId.ToString());
+        if (user is null)
+        {
+            return ApplicationErrors.UserErrors.NotFound;
+        }
         
         existingToken.IsRevoked = true;
-        await  _refreshTokenRepository.UpdateAsync(cancellationToken);
+        await _refreshTokenRepository.UpdateAsync(cancellationToken);
         
         var roles = await _userManager.GetRolesAsync(user);
         var accessToken = _jwtTokenGenerator.GenerateAccessToken(user, roles);
@@ -120,16 +135,21 @@ public class AuthService(
         
         return new AuthResponseDto(accessToken, newRefreshToken);
     }
-    public async Task RevokeRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
+
+
+    public async Task<Result> RevokeRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
     {
         var existingToken = await _refreshTokenRepository.GetByTokenAsync(refreshToken, cancellationToken, true);
         if (existingToken is null)
         {
-            return;
+            return Result.Success(); 
         }
         
         existingToken.IsRevoked = true;
         
         await _refreshTokenRepository.UpdateAsync(cancellationToken);
+
+        return Result.Success();
     }
 }
+

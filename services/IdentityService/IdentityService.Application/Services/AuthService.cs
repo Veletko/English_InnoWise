@@ -5,6 +5,7 @@ using IdentityService.Domain.Shared;
 using IdentityService.Domain.Errors; 
 using Microsoft.AspNetCore.Identity;
 using IdentityService.Domain.Entities;
+using IdentityService.Domain.Enums;
 
 namespace IdentityService.Application.Services;
 
@@ -80,7 +81,7 @@ public class AuthService(
         if (!result.Succeeded)
         {
             var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            return new Error("UserErrors.CreationFailed", $"User creation failed: {errors}");
+            return new Error("UserErrors.CreationFailed", $"User creation failed: {errors}", ErrorType.Conflict);
         }
 
         var roleName = request.Role.ToString();

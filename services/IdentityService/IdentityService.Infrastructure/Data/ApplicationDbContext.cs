@@ -5,8 +5,14 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace IdentityService.Infrastructure.Data;
 
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<User, IdentityRole<Guid>, Guid>(options)
+
+public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 {
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    {
+        Database.EnsureCreated();
+    }
+
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -38,7 +44,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     {
         using var sha256 = System.Security.Cryptography.SHA256.Create();
         byte[] hash = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(input));
-        return new Guid(hash).ToString();
+        
+        byte[] guidBytes = new byte[16];
+        Array.Copy(hash, guidBytes, 16);
+    
+        return new Guid(guidBytes).ToString();
     }
 }
 

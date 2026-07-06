@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using IdentityService.Infrastructure.Repositories;
 using IdentityService.Infrastructure.Security;
+using Microsoft.AspNetCore.Identity;
 
 namespace IdentityService.Infrastructure.DI;
 
@@ -16,8 +17,9 @@ public static class DependencyInjection
     {
         return services
             .AddDBContext(configuration)
-            .AddRepositories()
+            .AddRepositories(configuration)
             .AddIdentityServices()
+            .AddJwt(configuration)
             .AddBackgroundTasks();
 
     }
@@ -28,6 +30,7 @@ public static class DependencyInjection
                 options.Password.RequireDigit = true;
                 options.Password.RequiredLength = 6;
             })
+            .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
         
         return services;
@@ -41,13 +44,18 @@ public static class DependencyInjection
         return services;
     }
 
-    private static IServiceCollection AddRepositories(this IServiceCollection services)
+    private static IServiceCollection AddRepositories(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         return services;
     }
 
+    private static IServiceCollection AddJwt(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+        return services;
+    }
     private static IServiceCollection AddBackgroundTasks(this IServiceCollection services)
     {
         services.AddHostedService<TokenCleanupBackgroundService>();

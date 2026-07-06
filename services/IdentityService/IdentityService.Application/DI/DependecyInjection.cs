@@ -14,7 +14,6 @@ public static class DependecyInjection
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthService>();
-        services.AddAuthentication();
         return services;
     }
 }

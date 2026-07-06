@@ -1,8 +1,6 @@
-using System.Text;
 using IdentityService.Api.Endpoints;
 using IdentityService.Application.DI;
 using IdentityService.Infrastructure.DI;
-using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 
 namespace IdentityService.Api;
@@ -15,7 +13,7 @@ public class Program
         
         builder.Services.AddInfrastructure(builder.Configuration);
         builder.Services.AddApplication();
-        
+        builder.Services.AddAuthentication();
         builder.Services.AddOpenApi();
 
         var app = builder.Build();

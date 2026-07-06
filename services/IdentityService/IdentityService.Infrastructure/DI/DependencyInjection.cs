@@ -8,16 +8,17 @@ using Microsoft.Extensions.DependencyInjection;
 using IdentityService.Infrastructure.Repositories;
 using IdentityService.Infrastructure.Security;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 
 namespace IdentityService.Infrastructure.DI;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
-    {
-        return services
-            .AddDBContext(configuration)
-            .AddRepositories(configuration)
+    public static void AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    { 
+        services
+            .AddDbContext(configuration)
+            .AddRepositories()
             .AddIdentityServices()
             .AddJwt(configuration)
             .AddBackgroundTasks();
@@ -35,7 +36,7 @@ public static class DependencyInjection
         
         return services;
     }
-    private static IServiceCollection AddDBContext(this IServiceCollection services, IConfiguration configuration)
+    private static IServiceCollection AddDbContext(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("ConnectionString");
         services.AddDbContext<ApplicationDbContext>(options =>
@@ -44,7 +45,7 @@ public static class DependencyInjection
         return services;
     }
 
-    private static IServiceCollection AddRepositories(this IServiceCollection services, IConfiguration configuration)
+    private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         return services;
@@ -56,9 +57,12 @@ public static class DependencyInjection
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         return services;
     }
-    private static IServiceCollection AddBackgroundTasks(this IServiceCollection services)
+    private static void AddBackgroundTasks(this IServiceCollection services)
     {
-        services.AddHostedService<TokenCleanupBackgroundService>();
-        return services;
+        services.AddHostedService(sp => 
+            new TokenCleanupBackgroundService(
+                sp.GetRequiredService<IServiceScopeFactory>(),
+                sp.GetRequiredService<ILogger<TokenCleanupBackgroundService>>()
+            ));
     }
 }

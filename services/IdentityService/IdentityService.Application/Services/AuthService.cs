@@ -1,6 +1,6 @@
 ﻿using IdentityService.Application.DTOs;
 using IdentityService.Application.Interfaces;
-using IdentityService.Application.Exceptions; 
+using IdentityService.Application.Errors; 
 using IdentityService.Domain.Shared; 
 using IdentityService.Domain.Errors; 
 using Microsoft.AspNetCore.Identity;
@@ -74,14 +74,14 @@ public class AuthService(
             Email = request.Email,
             FirstName = request.FirstName,
             LastName = request.LastName,
-            CreatedAtUtc = currentTime
+            CreatedAtUtc = currentTime,
+            UserName = request.Email
         };
 
         var result = await _userManager.CreateAsync(newUser, request.Password);
         if (!result.Succeeded)
         {
-            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            return new Error("UserErrors.CreationFailed", $"User creation failed: {errors}", ErrorType.Conflict);
+            return ApplicationErrors.UserErrors.UserCreationFailed;
         }
 
         var roleName = request.Role.ToString();

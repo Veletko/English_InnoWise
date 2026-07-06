@@ -14,6 +14,7 @@ public class JwtTokenGenerator(
 {
     TimeProvider _timeProvider = timeProvider;
     JwtSettings _jwtSettings = jwtOptions.Value;
+    
     public string GenerateAccessToken(User user, IEnumerable<string> roles)
     {
         var claims = new List<Claim>
@@ -41,10 +42,8 @@ public class JwtTokenGenerator(
 
     public string GenerateRefreshToken()
     {
-        var randomNumber = new byte[32];
-        using var rng = RandomNumberGenerator.Create();
-        rng.GetBytes(randomNumber);
-        
+        byte[] randomNumber = new byte[32];
+        RandomNumberGenerator.Fill(randomNumber); 
         return Convert.ToBase64String(randomNumber);
     }
 }

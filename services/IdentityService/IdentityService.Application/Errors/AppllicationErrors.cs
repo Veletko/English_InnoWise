@@ -1,7 +1,7 @@
 ﻿using IdentityService.Domain.Enums;
 using IdentityService.Domain.Errors;
 
-namespace IdentityService.Application.Exceptions;
+namespace IdentityService.Application.Errors;
 
 public static class ApplicationErrors
 {
@@ -15,6 +15,9 @@ public static class ApplicationErrors
 
         public static readonly Error InvalidCredentials = new($"{nameof(UserErrors)}.{nameof(InvalidCredentials)}", 
             "Wrong email or password.", ErrorType.Validation);
+
+        public static readonly Error UserCreationFailed = new($"{nameof(UserErrors)}.{nameof(UserCreationFailed)}",
+            "User creation failed.", ErrorType.Conflict);
     }
 
     public static class TokenErrors

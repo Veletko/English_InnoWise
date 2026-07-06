@@ -1,4 +1,5 @@
 ﻿using IdentityService.Domain.Entities;
+using IdentityService.Infrastructure.Utilities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -6,13 +7,9 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 namespace IdentityService.Infrastructure.Data;
 
 
-public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+    : IdentityDbContext<User, IdentityRole<Guid>, Guid>(options)
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-    {
-        Database.EnsureCreated();
-    }
-
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -34,21 +31,11 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
                 .Where(role => role != IdentityService.Domain.Enums.UserRole.None)
                 .Select(role => new IdentityRole<Guid>
                 {
-                    Id = Guid.Parse(CreateGuidFromString(role.ToString())),
+                    Id = Guid.Parse(UtitlityHeandler.CreateGuidFromString(role.ToString())),
                     Name = role.ToString(),
                     NormalizedName = role.ToString().ToUpper()
                 })
         );
-    }
-    private static string CreateGuidFromString(string input)
-    {
-        using var sha256 = System.Security.Cryptography.SHA256.Create();
-        byte[] hash = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(input));
-        
-        byte[] guidBytes = new byte[16];
-        Array.Copy(hash, guidBytes, 16);
-    
-        return new Guid(guidBytes).ToString();
     }
 }
 

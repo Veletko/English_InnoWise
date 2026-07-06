@@ -6,14 +6,13 @@ namespace IdentityService.Application.DI;
 
 public static class DependecyInjection
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services)
+    public static void AddApplication(this IServiceCollection services)
     {
-        return services.AddServices();
+        services.AddServices();
     }
 
-    private static IServiceCollection AddServices(this IServiceCollection services)
+    private static void AddServices(this IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthService>();
-        return services;
     }
 }

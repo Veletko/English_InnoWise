@@ -1,20 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using IdentityService.Domain.Shared;
-using IdentityService.Application.Exceptions;
+﻿using IdentityService.Domain.Shared;
 using IdentityService.Domain.Errors;
 using IdentityService.Domain.Enums;
+
 namespace IdentityService.Api.Extensions;
 
 public static class ResultExtensions
 {
     public static IResult ToHttpResponse<T>(this Result<T> result)
     {
-        if (result.IsSuccess)
-        {
-            return result.Value is null ? Results.Ok() : Results.Ok(result.Value);
-        }
-        
-        return MapErrorToResult(result.Error!);
+        return result.IsSuccess ? Results.Ok(result.Value) : MapErrorToResult(result.Error!);
     }
     
     public static IResult ToHttpResponse(this Result result)
@@ -24,27 +18,49 @@ public static class ResultExtensions
     
     private static IResult MapErrorToResult(Error error)
     {
+        var extensions = new Dictionary<string, object?>
+        {
+            { "code", error.Code}
+        };
         return error.Type switch
         {
-            ErrorType.Unauthorized => Results.Json(
-                new { error.Code, error.Message }, 
-                statusCode: StatusCodes.Status401Unauthorized),
+            ErrorType.Unauthorized => Results.Problem(
+                detail: error.Message,
+                statusCode: StatusCodes.Status401Unauthorized,
+                title: "Unauthorized",
+                extensions: extensions
+                ),
             
-            ErrorType.Forbidden => Results.Json(
-                new { error.Code, error.Message }, 
-                statusCode: StatusCodes.Status403Forbidden),
+            ErrorType.Forbidden => Results.Problem(
+                detail: error.Message,
+                statusCode: StatusCodes.Status403Forbidden,
+                title: "Forbidden",
+                extensions: extensions),
             
-            ErrorType.Conflict => Results.Conflict(new { error.Code, error.Message }),
+            ErrorType.Conflict => Results.Problem(
+                detail: error.Message,
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Conflict",
+                extensions: extensions),
             
-            ErrorType.NotFound => Results.NotFound(new { error.Code, error.Message }),
+            ErrorType.NotFound => Results.Problem(
+                detail: error.Message,
+                statusCode: StatusCodes.Status404NotFound,
+                title: "NotFound",
+                extensions: extensions),
             
-            ErrorType.Validation => Results.BadRequest(new { error.Code, error.Message }),
+            ErrorType.Validation => Results.Problem(
+                detail: error.Message,
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "BadRequest",
+                extensions: extensions),
             
-            _ => Results.Json(
-                new { Code = "InternalServerError", Message = "Произошла непредвиденная ошибка." }, 
-                statusCode: StatusCodes.Status500InternalServerError)
+            _ => Results.Problem(
+                detail: error.Message,
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "Internal Server Error",
+                extensions: new Dictionary<string, object?> { { "code", "InternalServerError" } })
         };
     }
-
 }
 

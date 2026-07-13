@@ -1,11 +1,14 @@
 ﻿using IdentityService.Domain.Entities;
+using IdentityService.Infrastructure.Utilities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace IdentityService.Infrastructure.Data;
 
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<User, IdentityRole<Guid>, Guid>(options)
+
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+    : IdentityDbContext<User, IdentityRole<Guid>, Guid>(options)
 {
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
@@ -28,17 +31,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .Where(role => role != IdentityService.Domain.Enums.UserRole.None)
                 .Select(role => new IdentityRole<Guid>
                 {
-                    Id = Guid.Parse(CreateGuidFromString(role.ToString())),
+                    Id = Guid.Parse(UtitlityHeandler.CreateGuidFromString(role.ToString())),
                     Name = role.ToString(),
                     NormalizedName = role.ToString().ToUpper()
                 })
         );
-    }
-    private static string CreateGuidFromString(string input)
-    {
-        using var sha256 = System.Security.Cryptography.SHA256.Create();
-        byte[] hash = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(input));
-        return new Guid(hash).ToString();
     }
 }
 

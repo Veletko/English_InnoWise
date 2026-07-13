@@ -5,7 +5,15 @@ namespace IdentityService.Domain.Shared;
 public record Result<TValue> : Result
 {
     private readonly TValue? _value;
-    private Result(TValue value) : base(true, null) => _value = value;
+
+    private Result(TValue value) : base(true, null)
+    {
+        if (value is null)
+        {
+            throw new ArgumentNullException(nameof(value), "Success result cannot be null.");
+        }
+        _value = value;
+    }
 
     private Result(Error error) : base(false, error) { }
 

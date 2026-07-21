@@ -31,5 +31,14 @@ public static class ApplicationErrors
         public static readonly Error Expired = new($"{nameof(TokenErrors)}.{nameof(Expired)}", 
             "Refresh token has expired.", ErrorType.Unauthorized);
     }
+
+    public static class ValidationError
+    {
+        public static Error FromValidationResult(string propertyName, string errorMessage) 
+            => new(
+                $"Validation.{propertyName}", 
+                errorMessage,                 
+                ErrorType.Validation);
+    }
 }
 

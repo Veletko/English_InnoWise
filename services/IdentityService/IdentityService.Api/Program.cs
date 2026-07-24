@@ -1,3 +1,4 @@
+using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 using IdentityService.Api.Endpoints;
 using IdentityService.Application.DI;
 using IdentityService.Infrastructure.Data;
@@ -14,6 +15,7 @@ public class Program
         
         builder.Services.AddInfrastructure(builder.Configuration);
         builder.Services.AddApplication();
+        builder.Services.AddFluentValidationAutoValidation();
         builder.Services.AddAuthentication();
         builder.Services.AddOpenApi();
         

@@ -4,7 +4,6 @@ using IdentityService.Application.Errors;
 using IdentityService.Domain.Shared; 
 using Microsoft.AspNetCore.Identity;
 using IdentityService.Domain.Entities;
-using FluentValidation;
 
 namespace IdentityService.Application.Services;
 
@@ -12,9 +11,7 @@ public class AuthService(
         UserManager<User> userManager,
         IRefreshTokenRepository refreshTokenRepository,
         IJwtTokenGenerator jwtTokenGenerator,
-        TimeProvider timeProvider,
-        IValidator<RegisterRequestDto> registerValidator,
-        IValidator<LoginRequestDto> loginValidator) : IAuthService
+        TimeProvider timeProvider) : IAuthService
         
 {
     private static readonly TimeSpan RefreshTokenLifetime = TimeSpan.FromDays(7);
@@ -22,8 +19,7 @@ public class AuthService(
     private readonly IRefreshTokenRepository _refreshTokenRepository = refreshTokenRepository;
     private readonly IJwtTokenGenerator _jwtTokenGenerator = jwtTokenGenerator;
     private readonly TimeProvider _timeProvider = timeProvider;
-    private readonly IValidator<RegisterRequestDto> _registerValidator = registerValidator;
-    private readonly IValidator<LoginRequestDto> _loginValidator = loginValidator;
+
     private static RefreshToken GenerateRefreshToken(User user, DateTimeOffset currentTime, string refreshToken)
     { 
         return new RefreshToken
@@ -38,16 +34,6 @@ public class AuthService(
     
     public async Task<Result<AuthResponseDto>> LoginAsync(LoginRequestDto request, CancellationToken cancellationToken)
     {
-        var validationResult = await _loginValidator.ValidateAsync(request, cancellationToken);
-        
-        if (!validationResult.IsValid)
-        {
-            var firstError = validationResult.Errors.First();
-            return ApplicationErrors.ValidationError.FromValidationResult(
-                firstError.PropertyName,
-                firstError.ErrorMessage);
-        }
-        
         var user = await _userManager.FindByEmailAsync(request.Email);
         
         if (user is null)
@@ -74,16 +60,6 @@ public class AuthService(
     }
     public async Task<Result<AuthResponseDto>> RegisterAsync(RegisterRequestDto request, CancellationToken cancellationToken)
     {
-        var validationResult = await _registerValidator.ValidateAsync(request, cancellationToken);
-        
-        if (!validationResult.IsValid)
-        {
-            var firstError = validationResult.Errors.First();
-            return ApplicationErrors.ValidationError.FromValidationResult(
-                firstError.PropertyName,
-                firstError.ErrorMessage);
-        }
-        
         var existingUser = await _userManager.FindByEmailAsync(request.Email);
         if (existingUser is not null)
         {

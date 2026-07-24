@@ -3,12 +3,10 @@ using IdentityService.Application.Interfaces;
 using IdentityService.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 using FluentValidation;
-using IdentityService.Application.DTOs;
-using IdentityService.Application.Validators;
 
 namespace IdentityService.Application.DI;
 
-public static class DependecyInjection
+public static class DependencyInjection
 {
     public static void AddApplication(this IServiceCollection services)
     {
@@ -23,9 +21,10 @@ public static class DependecyInjection
         return services;
     }
 
-    private static void AddValidators(this IServiceCollection services)
+    private static IServiceCollection AddValidators(this IServiceCollection services)
     {
-        services.AddScoped<IValidator<LoginRequestDto>, LoginRequestValidator>();
-        services.AddScoped<IValidator<RegisterRequestDto>, RegisterRequestValidator>();
+        services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        
+        return services;
     }
 }

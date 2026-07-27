@@ -2,13 +2,11 @@
 
 namespace CourseService.Domain.Entities;
 
-public class Course
+public class Course : BaseEntity
 {
-    public Guid Id { get; set; }
     public required string Title { get; set; }
     public string? Description { get; set; }
-    public CourseLevel Level { get; set; }
-    public Guid AuthorId  { get; set; }
-    public bool IsPublished { get; set; }
-    public DateTimeOffset CreatedAt { get; set; }
+    public required CourseLevel Level { get; set; }
+    public required Guid AuthorId  { get; set; }
+    public required bool IsPublished { get; set; }
 }

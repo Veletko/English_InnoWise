@@ -1,9 +1,8 @@
 ﻿namespace CourseService.Domain.Entities;
 
-public class Module
+public class Module : BaseEntity
 {
-    public Guid Id { get; set; }
-    public Guid CourseId { get; set; }
+    public required Guid CourseId { get; set; }
     public required string Title { get; set; }
-    public int Order { get; set; }
+    public required int Order { get; set; }
 }

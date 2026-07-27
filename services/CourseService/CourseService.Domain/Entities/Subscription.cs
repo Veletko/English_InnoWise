@@ -2,11 +2,9 @@
 
 namespace CourseService.Domain.Entities;
 
-public class Subscription
+public class Subscription : BaseEntity
 {
-    public Guid Id { get; set; }
-    public Guid CourseId { get; set; }
-    public Guid UserId { get; set; }
-    public CourseStatus Status { get; set; }
-    public DateTimeOffset SubscribedAt { get; set; }
+    public required Guid CourseId { get; set; }
+    public required Guid UserId { get; set; }
+    public required CourseStatus Status { get; set; }
 }

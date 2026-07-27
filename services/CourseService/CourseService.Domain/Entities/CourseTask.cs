@@ -1,14 +1,14 @@
-﻿using System.Text.Json.Nodes;
-using CourseService.Domain.Enums;
+﻿using CourseService.Domain.Enums;
+using CourseService.Domain.Payloads;
+
 namespace CourseService.Domain.Entities;
 
-public class CourseTask
+public class CourseTask : BaseEntity
 {
-    public Guid Id { get; set; }
-    public Guid LessonId { get; set; }
+    public required Guid LessonId { get; set; }
     public required string Title { get; set; }
-    public TaskType Type { get; set; }
-    public int Order { get; set; }
-    public int MaxScore { get; set; }
-    public string Content { get; set; } = string.Empty;
+    public required TaskType Type { get; set; }
+    public required int Order { get; set; }
+    public required int MaxScore { get; set; }
+    public required TaskPayload Payload { get; set; }
 }

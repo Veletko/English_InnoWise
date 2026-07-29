@@ -2,10 +2,8 @@
 using IdentityService.Application.Interfaces;
 using IdentityService.Application.Errors; 
 using IdentityService.Domain.Shared; 
-using IdentityService.Domain.Errors; 
 using Microsoft.AspNetCore.Identity;
 using IdentityService.Domain.Entities;
-using IdentityService.Domain.Enums;
 
 namespace IdentityService.Application.Services;
 
@@ -14,13 +12,14 @@ public class AuthService(
         IRefreshTokenRepository refreshTokenRepository,
         IJwtTokenGenerator jwtTokenGenerator,
         TimeProvider timeProvider) : IAuthService
+        
 {
     private static readonly TimeSpan RefreshTokenLifetime = TimeSpan.FromDays(7);
     private readonly UserManager<User> _userManager = userManager;
     private readonly IRefreshTokenRepository _refreshTokenRepository = refreshTokenRepository;
     private readonly IJwtTokenGenerator _jwtTokenGenerator = jwtTokenGenerator;
     private readonly TimeProvider _timeProvider = timeProvider;
-    
+
     private static RefreshToken GenerateRefreshToken(User user, DateTimeOffset currentTime, string refreshToken)
     { 
         return new RefreshToken

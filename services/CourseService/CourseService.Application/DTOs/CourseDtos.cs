@@ -33,7 +33,7 @@ public record CourseDetailsDto(
     Guid AuthorId,
     bool IsPublished,
     DateTimeOffset CreatedAt,
-    List<ModuleDto> Modules
+    List<ModuleSummaryDto> Modules
 );
 
 public record StudentCourseDto(

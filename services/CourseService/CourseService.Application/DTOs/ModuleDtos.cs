@@ -18,3 +18,10 @@ public record ModuleDto(
     int Order,
     List<LessonSummaryDto> Lessons
 );
+
+public record ModuleSummaryDto(
+    Guid Id,
+    Guid CourseId,
+    string Title,
+    int Order
+);

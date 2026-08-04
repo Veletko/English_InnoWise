@@ -6,4 +6,5 @@ public class Lesson : BaseEntity
     public required string Title { get; set; }
     public required string Content { get; set; }
     public required int Order { get; set; }
+    public ICollection<CourseTask> Tasks { get; set; } = new List<CourseTask>();
 }

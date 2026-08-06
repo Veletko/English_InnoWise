@@ -1,14 +1,4 @@
-﻿namespace CourseService.Application.DTOs;
-
-public record SubmitTaskDto(
-    string UserAnswer
-);
-
-public record GradeSubmissionDto(
-    int Score, 
-    bool IsCorrect, 
-    string? TeacherFeedback
-);
+﻿namespace CourseService.Application.DTOs.SubmissionDtos;
 
 public record TaskSubmissionDto(
     Guid Id, 

@@ -1,44 +1,50 @@
-﻿using CourseService.Application.DTOs;
+﻿using CourseService.Application.Constants;
+using CourseService.Application.DTOs;
+using CourseService.Application.DTOs.CourseDtos;
 
-namespace CourseService.Application.Interfaces;
+namespace CourseService.Application.Interfaces.Services;
 
 public interface ICourseService
 {
-    Task<CourseDetailsDto> CreateCourseAsync(
+    Task<Guid> CreateCourseAsync(
         Guid authorId,
         CreateCourseDto createCourseDto,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken );
     
-    Task<CourseDetailsDto> UpdateCourseAsync(
-        Guid authorId,
+    Task UpdateCourseAsync(
         Guid courseId,
+        Guid userId,
         UpdateCourseDto updateCourseDto,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken );
     
     Task DeleteCourseAsync(
-        Guid authorId,
         Guid courseId,
-        CancellationToken cancellationToken = default);
+        Guid userId,
+        CancellationToken cancellationToken );
     
     Task<IEnumerable<CourseSummaryDto>> GetAuthorCoursesAsync(
         Guid authorId,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken,
+        int page = NumericalConsts.DefaultPageNumber, 
+        int pageSize = NumericalConsts.DefaultPageSize);
     
     Task<CourseDetailsDto?> GetCourseByIdAsync(
         Guid courseId, 
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken );
     
     Task<IEnumerable<CourseSummaryDto>> GetPublishedCoursesAsync(
-        int page = 1, 
-        int pageSize = 10, 
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken,
+        int page = NumericalConsts.DefaultPageNumber, 
+        int pageSize = NumericalConsts.DefaultPageSize);
     
     Task<IEnumerable<StudentCourseDto>> GetStudentCoursesAsync(
-        Guid userId, 
-        CancellationToken cancellationToken = default);
+        Guid studentId, 
+        CancellationToken cancellationToken,
+        int page = NumericalConsts.DefaultPageNumber, 
+        int pageSize = NumericalConsts.DefaultPageSize);
 
-    Task<CourseDetailsDto?> GetStudentCourseContentAsync(
-        Guid userId, 
+    Task<StudentCourseDto?> GetStudentCourseContentAsync(
+        Guid studentId, 
         Guid courseId, 
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken );
 }

@@ -1,34 +1,31 @@
 ﻿using CourseService.Application.DTOs;
+using CourseService.Application.DTOs.TaskDtos;
 
-namespace CourseService.Application.Interfaces;
+namespace CourseService.Application.Interfaces.Services;
 
 public interface ITaskService
 {
-    Task<TaskDto> CreateTaskAsync(
+    Task<Guid> CreateTaskAsync(
         Guid authorId,
-        Guid lessonId,
         CreateTaskDto createTaskDto,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken );
 
-    Task<TaskDto> UpdateTaskAsync(
-        Guid authorId,
+    Task UpdateTaskAsync(
         Guid taskId,
+        Guid userId,
         UpdateTaskDto updateTaskDto,
-        CancellationToken cancellationToken = default
-    );
+        CancellationToken cancellationToken );
 
     Task DeleteTaskAsync(
-        Guid authorId,
         Guid taskId,
-        CancellationToken cancellationToken = default
-    );
+        Guid userId,
+        CancellationToken cancellationToken );
     
     Task<IEnumerable<TaskDto>> GetTasksByLessonIdAsync(
         Guid lessonId,
-        CancellationToken cancellationToken = default
-    );
+        CancellationToken cancellationToken );
     
     Task<TaskDto?> GetTaskByIdAsync(
         Guid taskId,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken );
 }

@@ -1,32 +1,32 @@
 ﻿using CourseService.Application.DTOs;
+using CourseService.Application.DTOs.ModuleDtos;
 
-namespace CourseService.Application.Interfaces;
+namespace CourseService.Application.Interfaces.Services;
 
 public interface IModuleService
 {
 
-    Task<ModuleDto> CreateModuleAsync(
+    Task<Guid> CreateModuleAsync(
         Guid authorId, 
-        Guid courseId, 
-        CreateModuleDto dto, 
-        CancellationToken cancellationToken = default);
+        CreateModuleDto createModuleDto, 
+        CancellationToken cancellationToken);
     
-    Task<ModuleDto> UpdateModuleAsync(
-        Guid authorId, 
+    Task UpdateModuleAsync(
         Guid moduleId, 
-        UpdateModuleDto dto, 
-        CancellationToken cancellationToken = default);
+        Guid userId,
+        UpdateModuleDto updateModuleDto, 
+        CancellationToken cancellationToken);
     
     Task DeleteModuleAsync(
-        Guid authorId, 
         Guid moduleId, 
-        CancellationToken cancellationToken = default);
+        Guid userId,
+        CancellationToken cancellationToken);
     
     Task<IEnumerable<ModuleSummaryDto>> GetModulesByCourseIdAsync(
         Guid courseId, 
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken);
 
     Task<ModuleDto?> GetModuleByIdAsync(
         Guid moduleId,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken);
 }

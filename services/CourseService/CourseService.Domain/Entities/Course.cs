@@ -9,4 +9,5 @@ public class Course : BaseEntity
     public required CourseLevel Level { get; set; }
     public required Guid AuthorId  { get; set; }
     public required bool IsPublished { get; set; }
+    public ICollection<Module> Modules { get; set; } = new List<Module>();
 }

@@ -1,11 +1,9 @@
-﻿using CourseService.Application.DTOs;
-using CourseService.Application.DTOs.ModuleDtos;
+﻿using CourseService.Application.DTOs.ModuleDtos;
 
 namespace CourseService.Application.Interfaces.Services;
 
 public interface IModuleService
 {
-
     Task<Guid> CreateModuleAsync(
         Guid authorId, 
         CreateModuleDto createModuleDto, 

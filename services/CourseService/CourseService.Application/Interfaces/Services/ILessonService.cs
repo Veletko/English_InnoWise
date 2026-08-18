@@ -1,5 +1,4 @@
-﻿using CourseService.Application.DTOs;
-using CourseService.Application.DTOs.LessonDtos;
+﻿using CourseService.Application.DTOs.LessonDtos;
 
 namespace CourseService.Application.Interfaces.Services;
 

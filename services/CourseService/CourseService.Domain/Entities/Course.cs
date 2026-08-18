@@ -8,7 +8,6 @@ public class Course : BaseEntity
     public string? Description { get; set; }
     public required CourseLevel Level { get; set; }
     public required Guid AuthorId  { get; set; }
-    public required string AuthorName { get; set; }
     public required bool IsPublished { get; set; }
     public ICollection<Module> Modules { get; set; } = new List<Module>();
 }

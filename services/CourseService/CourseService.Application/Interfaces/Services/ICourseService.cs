@@ -25,8 +25,8 @@ public interface ICourseService
     Task<IEnumerable<CourseSummaryDto>> GetAuthorCoursesAsync(
         Guid authorId,
         CancellationToken cancellationToken,
-        int page = NumericalConsts.DefaultPageNumber, 
-        int pageSize = NumericalConsts.DefaultPageSize);
+        int page = PageConsts.DefaultPageNumber, 
+        int pageSize = PageConsts.DefaultPageSize);
     
     Task<CourseDetailsDto?> GetCourseByIdAsync(
         Guid courseId, 
@@ -34,14 +34,14 @@ public interface ICourseService
     
     Task<IEnumerable<CourseSummaryDto>> GetPublishedCoursesAsync(
         CancellationToken cancellationToken,
-        int page = NumericalConsts.DefaultPageNumber, 
-        int pageSize = NumericalConsts.DefaultPageSize);
+        int page = PageConsts.DefaultPageNumber, 
+        int pageSize = PageConsts.DefaultPageSize);
     
     Task<IEnumerable<StudentCourseDto>> GetStudentCoursesAsync(
         Guid studentId, 
         CancellationToken cancellationToken,
-        int page = NumericalConsts.DefaultPageNumber, 
-        int pageSize = NumericalConsts.DefaultPageSize);
+        int page = PageConsts.DefaultPageNumber, 
+        int pageSize = PageConsts.DefaultPageSize);
 
     Task<StudentCourseDto?> GetStudentCourseContentAsync(
         Guid studentId, 

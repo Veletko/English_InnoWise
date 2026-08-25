@@ -2,10 +2,10 @@
 
 namespace CourseService.Application.Interfaces.Repositories;
 
-public interface IBaseRepository
+public interface IBaseRepository<TEntity> where TEntity : BaseEntity
 {
-    Task<TEntity?> GetByIdAsync<TEntity>(Guid id, CancellationToken cancellationToken) where TEntity : BaseEntity;
-    Task AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken) where TEntity : BaseEntity;
-    void Update<TEntity>(TEntity entity) where TEntity : BaseEntity;
-    void Delete<TEntity>(TEntity entity) where TEntity : BaseEntity;
+    Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+    void AddAsync(TEntity entity);
+    void Update(TEntity entity);
+    void Delete(TEntity entity);
 }

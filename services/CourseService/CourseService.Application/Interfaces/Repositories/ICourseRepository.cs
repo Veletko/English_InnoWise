@@ -1,32 +1,23 @@
-﻿using CourseService.Application.Constants;
+﻿using CourseService.Application.DTOs.Common;
 using CourseService.Domain.Entities;
 
 namespace CourseService.Application.Interfaces.Repositories;
 
-public interface ICourseRepository : IBaseRepository
+public interface ICourseRepository : IBaseRepository<Course>
 {
     Task<Course?> GetCourseStructureAsync(Guid courseId, CancellationToken cancellationToken);
     
-    Task<(IEnumerable<Course> Items, int TotalCount)> GetPublishedCoursesAsync(
-        CancellationToken cancellationToken,
-        int page = PageConsts.DefaultPageNumber,
-        int pageSize = PageConsts.DefaultPageSize ); 
+    Task<PagedResult<Course>> GetPublishedCoursesAsync(
+        PageRequest request,
+        CancellationToken cancellationToken); 
     
-    Task<(IEnumerable<Course> Items, int TotalCount)> GetAuthorCoursesAsync(
-        CancellationToken cancellationToken,
+    Task<PagedResult<Course>> GetAuthorCoursesAsync(
         Guid authorId,
-        int page = PageConsts.DefaultPageNumber,
-        int pageSize = PageConsts.DefaultPageSize);
+        PageRequest request,
+        CancellationToken cancellationToken);
     
-    Task<(IEnumerable<Course> Items, int TotalCount)> GetStudentCoursesAsync(
-        CancellationToken cancellationToken,
+    Task<PagedResult<Course>> GetStudentCoursesAsync(
         Guid studentId,
-        int page = PageConsts.DefaultPageNumber,
-        int pageSize = PageConsts.DefaultPageSize);
-    
-    Task<IEnumerable<Module>> GetModulesByCourseIdAsync(Guid courseId, CancellationToken cancellationToken);
-    
-    Task<IEnumerable<Lesson>> GetLessonsByModuleIdAsync(Guid moduleId, CancellationToken cancellationToken);
-    
-    Task<IEnumerable<Task>> GetCourseTasksByLessonIdAsync(Guid lessonId, CancellationToken cancellationToken);
+        PageRequest request,
+        CancellationToken cancellationToken);
 }

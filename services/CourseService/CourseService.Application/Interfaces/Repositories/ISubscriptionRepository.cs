@@ -2,8 +2,7 @@
 
 namespace CourseService.Application.Interfaces.Repositories;
 
-public interface ISubscriptionRepository : IBaseRepository
-{
-    Task<bool> ExistsAsync(Guid subscriptionId, CancellationToken cancellationToken);
-    Task<IEnumerable<Subscription>> GetUserSubscriptionsAsync(Guid user, CancellationToken cancellationToken);
+public interface ISubscriptionRepository : IBaseRepository<Subscription>
+{ 
+    Task<IEnumerable<Subscription>> GetUserSubscriptionsAsync(Guid userId, CancellationToken cancellationToken);
 }

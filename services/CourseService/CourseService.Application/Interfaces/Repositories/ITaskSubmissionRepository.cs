@@ -2,10 +2,10 @@
 
 namespace CourseService.Application.Interfaces.Repositories;
 
-public interface ITaskSubmissionRepository : IBaseRepository
+public interface ITaskSubmissionRepository : IBaseRepository<TaskSubmission>
 {
     Task<IEnumerable<TaskSubmission>> GetUserTaskSubmissionsAsync(Guid userId, Guid taskId, CancellationToken cancellationToken);
-    Task<IEnumerable<Subscription>> GetUserSubmissionsForCourseAsync(Guid userId, Guid courseId, CancellationToken cancellationToken);
-    Task<IEnumerable<Subscription>> GetSubmissionsToGradeAsync(Guid courseId, CancellationToken cancellationToken);
+    Task<IEnumerable<TaskSubmission>> GetUserSubmissionsForCourseAsync(Guid userId, Guid courseId, CancellationToken cancellationToken);
+    Task<IEnumerable<TaskSubmission>> GetSubmissionsToGradeAsync(Guid courseId, CancellationToken cancellationToken);
 }
 

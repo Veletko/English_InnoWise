@@ -12,5 +12,5 @@ public record CourseDetailsDto(
     string AuthorName,
     bool IsPublished,
     DateTimeOffset CreatedAt,
-    List<ModuleSummaryDto> Modules
+    List<ModuleDetailsDto> Modules
 );

@@ -2,7 +2,7 @@
 
 namespace CourseService.Application.DTOs.ModuleDtos;
 
-public record ModuleDto(
+public record ModuleDetailsDto(
     Guid Id,
     Guid CourseId,
     string Title,

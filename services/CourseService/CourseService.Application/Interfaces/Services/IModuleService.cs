@@ -20,11 +20,11 @@ public interface IModuleService
         Guid userId,
         CancellationToken cancellationToken);
     
-    Task<IEnumerable<ModuleSummaryDto>> GetModulesByCourseIdAsync(
+    Task<IEnumerable<ModuleDetailsDto>> GetModulesByCourseIdAsync(
         Guid courseId, 
         CancellationToken cancellationToken);
 
-    Task<ModuleDto?> GetModuleByIdAsync(
+    Task<ModuleDetailsDto?> GetModuleByIdAsync(
         Guid moduleId,
         CancellationToken cancellationToken);
 }

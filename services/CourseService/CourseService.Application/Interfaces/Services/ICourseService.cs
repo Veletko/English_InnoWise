@@ -1,5 +1,6 @@
 ﻿using CourseService.Application.Constants;
 using CourseService.Application.DTOs;
+using CourseService.Application.DTOs.Common;
 using CourseService.Application.DTOs.CourseDtos;
 
 namespace CourseService.Application.Interfaces.Services;
@@ -24,24 +25,21 @@ public interface ICourseService
     
     Task<IEnumerable<CourseSummaryDto>> GetAuthorCoursesAsync(
         Guid authorId,
-        CancellationToken cancellationToken,
-        int page = PageConsts.DefaultPageNumber, 
-        int pageSize = PageConsts.DefaultPageSize);
+        PageRequest request,
+        CancellationToken cancellationToken);
     
     Task<CourseDetailsDto?> GetCourseByIdAsync(
         Guid courseId, 
         CancellationToken cancellationToken );
     
     Task<IEnumerable<CourseSummaryDto>> GetPublishedCoursesAsync(
-        CancellationToken cancellationToken,
-        int page = PageConsts.DefaultPageNumber, 
-        int pageSize = PageConsts.DefaultPageSize);
+        PageRequest request,
+        CancellationToken cancellationToken);
     
     Task<IEnumerable<StudentCourseDto>> GetStudentCoursesAsync(
         Guid studentId, 
-        CancellationToken cancellationToken,
-        int page = PageConsts.DefaultPageNumber, 
-        int pageSize = PageConsts.DefaultPageSize);
+        PageRequest request,
+        CancellationToken cancellationToken);
 
     Task<StudentCourseDto?> GetStudentCourseContentAsync(
         Guid studentId, 

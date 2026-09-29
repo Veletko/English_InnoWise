@@ -9,8 +9,7 @@ public record CourseDetailsDto(
     string? Description,
     CourseLevel Level,
     Guid AuthorId,
-    string AuthorName,
     bool IsPublished,
     DateTimeOffset CreatedAt,
-    List<ModuleDetailsDto> Modules
+    List<ModuleSummaryDto> Modules
 );

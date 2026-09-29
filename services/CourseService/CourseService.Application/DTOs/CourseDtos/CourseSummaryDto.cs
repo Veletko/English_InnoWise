@@ -7,6 +7,5 @@ public record CourseSummaryDto(
     string Title,
     CourseLevel Level,
     Guid AuthorId,
-    string AuthorName,
     DateTimeOffset CreatedAt
 );
